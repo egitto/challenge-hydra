@@ -11,4 +11,11 @@ module.exports = [
   'gates',
   'swamp',
   'plain',
+  'island',
+  'moor',
+  'playa',
+  'wastes',
+  'land',
+  'wasteland',
+  'arctic',
 ];

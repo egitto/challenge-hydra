@@ -13,4 +13,10 @@ module.exports = [
   'wisdom',
   'violence',
   'warfare',
+  'hemmorhage',
+  'failure',
+  'charisma',
+  'strength',
+  'fortitude',
+  'foolishness'
 ];

@@ -5,4 +5,7 @@ module.exports = [
   'get past',
   'beat',
   'best',
+  'destroy',
+  'slay',
+  'decieve',
 ];

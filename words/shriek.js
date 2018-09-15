@@ -1,5 +1,6 @@
 module.exports = [
   'shriek',
+  'cry',
   'scream',
   'chant',
   'voice',
@@ -12,6 +13,7 @@ module.exports = [
   'voice',
   'voice',
   'mutter',
+  'susurrus',
   'murmur',
   'whisper',
 ];

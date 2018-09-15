@@ -1,34 +1,50 @@
-_cursed = require('./words/cursed');
-_shriek = require('./words/shriek');
-_chittering = require('./words/chittering');
-_moreChallenges = require('./words/moreChallenges');
-_bog = require('./words/bog');
-_defeat = require('./words/defeat');
-_doom = require('./words/doom');
-_traverse = require('./words/traverse');
-_sultan = require('./words/sultan');
-_complete = require('./words/complete');
-_interjections = require('./words/interjections');
+var _cursed = require('./words/cursed');
+var _shriek = require('./words/shriek');
+var _chittering = require('./words/chittering');
+var _moreChallenges = require('./words/moreChallenges');
+var _bog = require('./words/bog');
+var _defeat = require('./words/defeat');
+var _doom = require('./words/doom');
+var _traverse = require('./words/traverse');
+var _sultan = require('./words/sultan');
+var _complete = require('./words/complete');
+var _interjections = require('./words/interjections');
 
-example = `Gravelley voice: But first you must complete the Infernal Rites three
-Piping voice: Oh yes, the Infernal Rites, the Infernal Rites!
-Gravelley voice: The first infernal rite is to pass the Iron Gates
-Snarling voice: He'll never pass the Iron Gates!
-Chittering voice: The Iron Gates, oh, how I love the Iron Gates!
-All, in chorus: The Iron Gates! The Iron Gates!
-Liquid voice: The second Infernal Rite is to defeat the Stone Guardians seven
-Lugubrious voice: The first Stone Guardian is...`
 
-rand = n => Math.floor(n * Math.random());
+var plural = (s) => {
+  if (s instanceof Function) return (...args) => plural(s(...args));
+  var rules = {
+    a: /um$/, 
+    es: /is$/, 
+    i: /us$/, 
+    $1es: /(sh?)$/,
+    icies: /(i|e)x$/,
+    xes: /x$/,
+    ies: /y$/, 
+    ves: /fe$/, 
+    $1s: /([^s])$/,
+  };
+  for (r in rules) {
+    var n = s.replace(rules[r], r);
+    if (n !== s) return n;
+  }
+  return s;
+}
 
-cap = s => s[0].toUpperCase() + s.slice(1);
-evalThunk = (x, ...args) => ((x instanceof Function) ? x(...args) : x);
-randItem = x => x[rand(x.length)];
-conjure = (_thing) => {
-  const l = Math.floor(_thing.length / 2);
+var rand = n => Math.floor(n * Math.random());
+
+var cap = s => {
+  if (s instanceof Function) return (...args) => cap(s(...args));
+  return s[0].toUpperCase() + s.slice(1);
+}
+
+var evalThunk = (x, ...args) => ((x instanceof Function) ? x(...args) : x);
+var randItem = x => x[rand(x.length)];
+var conjure = (_thing) => {
+  var l = Math.floor(_thing.length / 2);
   console.log(_thing);
-  const recents = (new Array(l));
-  const randSkipRecents = a => {
+  var recents = (new Array(l));
+  var randSkipRecents = a => {
     r = rand(a.length);
     if (recents.includes(r)) {
       return randSkipRecents(a);
@@ -40,145 +56,177 @@ conjure = (_thing) => {
   return (...args) => evalThunk(randSkipRecents(_thing), ...args);
 }
 
-chittering = conjure(_chittering);
-shriek = conjure(_shriek);
+// the evalThunk is so it doesn't deplete uniqueness
+var maybe = (s, p = 0.5) => Math.random() < p ? `${evalThunk(s)} ` : '';
 
-_chitteringVoice = [
+var chittering = conjure(_chittering);
+var shriek = conjure(_shriek);
+
+var _chitteringVoice = [
   () => `${cap(chittering())} ${shriek()}:`,
   () => `${cap(chittering())} ${shriek()}:`,
   () => `${cap(chittering())} ${shriek()}:`,
   () => `${cap(chittering())} ${shriek()}:`,
   () => `${cap(chittering())}, ${chittering()} ${shriek()}:`,
 ]
-chitteringVoice = conjure(_chitteringVoice);
+var chitteringVoice = conjure(_chitteringVoice);
 
-doom = conjure(_doom);
-cursed = conjure(_cursed);
-bog = conjure(_bog);
-_cursedBogOfTheSultanOfDoom = [
+var doom = conjure(_doom);
+var cursed = conjure(_cursed);
+var bog = conjure(_bog);
+var _cursedBogOfTheSultanOfDoom = [
   () => `${cap(bog())}`,
-  () => `${cap(bog())} of the ${cap(cursed())} ${cap(sultan())}`,
+  () => `${cap(bog())} of the ${cap(cursed())} ${Sultan()}`,
   () => `${cap(cursed())} ${cap(bog())}`,
   () => `${cap(cursed())} ${cap(bog())}`,
   () => `${cap(cursed())} ${cap(bog())}`,
   () => `${cap(bog())} of the ${sultanOfDoom()}`,
 ]
-cursedBogOfTheSultanOfDoom = conjure(_cursedBogOfTheSultanOfDoom);
-traverse = conjure(_traverse);
+var cursedBogOfTheSultanOfDoom = conjure(_cursedBogOfTheSultanOfDoom);
+var traverse = conjure(_traverse);
 
+var bodyPart = conjure(['skull', 'bone', 'left arm', 'right arm', 'heart', 'hand']);
+var _weapon = ['sword', 'shield', 'glaive', 'axe', 'dagger'];
+var weapon = conjure(_weapon);
+var _artifact = _weapon.concat(['trophy', 'philtre', 'device', 'phylactery', 'cauldron', 'artifact']);
+var artifact = conjure(_artifact);
+var shard = conjure(['shard', 'fragment', 'piece', 'splinter']);
 
-_moreSultans = [
-  () => cap(sultan()) + '-' + cap(sultan()),
-  () => cap(sultan()) + '-' + cap(sultan()),
-  () => cap(sultan()) + '-' + cap(sultan()),
+var _artifactOfDoom = [
+  () => `${seven(rand(5) + 2)} ${maybe(cursed)}${plural(bodyPart())} of ${doom()}`,
+  () => `${maybe(cursed)}${bodyPart()} of ${doom()}`,
+  () => `${maybe(cursed)}${artifact()} of ${doom()}`,
+  () => `${maybe(cursed)}${bodyPart()} of the ${sultanOfDoom()}`,
+  () => `${maybe(cursed)}${artifact()} of the ${sultanOfDoom()}`,
+  () => `${seven(rand(12) + 2)} ${plural(artifact())} of the ${sultanOfDoom()}`,
+  () => `${seventh(rand(5) + 2)} ${sultanOfDoom()}`, // yes, a sultan is an artifact, sure
+  () => `${seven(rand(12) + 2)} ${plural(shard())} of the ${sultanOfDoom()}`,
+  () => `${seven(rand(12) + 2)} ${cursed()} ${plural(shard())} of the ${sultanOfDoom()}`,
+]
+var artifactOfDoom = conjure(_artifactOfDoom);
+
+var retrieve = conjure(['retrieve', 'fetch', 'destroy', 'consume', 'locate', 'learn from', 'find'])
+
+var _moreSultans = [
+  () => Sultan() + '-' + Sultan(),
+  () => Sultan() + '-' + Sultan(),
+  () => Sultan() + '-' + Sultan(),
+  () => { var s = sultan(); return `${cap(s)} of ${plural(s)}`; },
 ]
 _sultan = _sultan.concat(_moreSultans);
-sultan = conjure(_sultan);
+var sultan = conjure(_sultan);
+var Sultan = cap(sultan);
 
-_sultanOfDoom = [
-  () => `${cap(sultan())} of ${cap(doom())}`,
-  () => `${cap(sultan())} of ${cap(cursed())} ${cap(doom())}`,
-  () => `${cap(sultan())} of The ${cap(cursed())} ${cap(doom())}`,
-  () => `${cap(cursed())} ${cap(sultan())} of ${cap(doom())}`,
-  () => `${cap(cursed())} ${cap(sultan())} of ${cap(cursed())} ${cap(doom())}`,
-  () => `${cap(sultan())} of the ${cursedBogOfTheSultanOfDoom()}`,
+var _sultanOfDoom = [
+  () => `${Sultan()} of the ${cursedBogOfTheSultanOfDoom()}`,
+  () => `${Sultan()} of ${cap(doom())}`,
+  () => `${Sultan()} of ${cap(cursed())} ${cap(doom())}`,
+  () => `${Sultan()} of The ${cap(cursed())} ${cap(doom())}`,
+  () => `${cap(cursed())} ${Sultan()} of ${cap(doom())}`,
+  () => `${cap(cursed())} ${Sultan()} of ${cap(cursed())} ${cap(doom())}`,
+  () => `${Sultan()} of the ${cursedBogOfTheSultanOfDoom()}`,
   () => `${sultanOfDoom()}, the ${sultanOfDoom()}`,
-  () => `The ${cap(cursed())} ${cap(sultan())}`,
+  () => `${cap(cursed())} ${Sultan()}`,
 ]
-sultanOfDoom = conjure(_sultanOfDoom);
+var sultanOfDoom = conjure(_sultanOfDoom);
 
-defeat = conjure(_defeat)
+var defeat = conjure(_defeat)
 
-complete = conjure(_complete);
-moreChallenges = conjure(_moreChallenges);
-_moreChallengesOfDoom = [
+var complete = conjure(_complete);
+var moreChallenges = conjure(_moreChallenges);
+var _moreChallengesOfDoom = [
   () => `${cap(moreChallenges())} of the ${sultanOfDoom()}`,
   () => `${cap(cursed())} ${cap(moreChallenges())}`,
   () => `${cap(moreChallenges())} of ${cap(doom())}`,
   () => `${cap(cursed())} ${cap(moreChallenges())} of ${cap(doom())}`,
 ]
-moreChallengesOfDoom = conjure(_moreChallengesOfDoom);
+var moreChallengesOfDoom = conjure(_moreChallengesOfDoom);
 
-interp = (s) => (overcome, trial, seventh, seven) => s
+const interp = (s) => (overcome, trial, number, parent) => {
+  return evalThunk(s)
     .replace(/overcome/g, overcome)
     .replace(/trial/g, trial)
-    .replace(/seventh/, seventh) // if these are /seventh/g, then it breaks for seven, lol
-    .replace(/seven/, seven);
-
+    .replace(/_seventh/, seventh(number)) // if these are /seventh/g, then it breaks for seven, lol
+    .replace(/_seven/, seven(number))
+    .replace(/parentQuest/, parent && parent.challenge);
+}
 _interjections = _interjections.map(x => interp(x))
-interjections = conjure(_interjections)
+var interjections = conjure(_interjections)
 
-steps = conjure(['steps', 'parts', 'stages', 'levels', 'tasks']);
+var step = conjure(['step', 'part', 'stage', 'level', 'task', 'piece', 'component']);
+var steps = plural(step);
 _thereAreSevenSteps = [
-  `There are seven ${steps()} to the trial.`,
-  `There are seven ${steps()} before you can overcome the trial.`,
-  `There are seven ${steps()} to overcome the trial.`,
-  `The trial has seven ${steps()}.`,
+  () => "There are _seven steps to the trial.",
+  () => "There are _seven steps before you can overcome the trial.",
+  () => "There are _seven steps to overcome the trial.",
+  () => "The trial has _seven steps.",
 ]
-thereAreSevenSteps = conjure(_thereAreSevenSteps.map(interp));
+// todo: figure out how to put thunks into _thereAreSevenSteps
+var thereAreSevenSteps = conjure(_thereAreSevenSteps.map(interp));
 
-_firstYouMust = [
+var _firstYouMust = [
   "First, you must overcome the trial.",
   "You must first overcome the trial.",
   "First, overcome the trial.",
-  "Before anything else, you must overcome the trial.",
-  "As soon as you start, you _must_ overcome the trial.",
+  "The first step of the parentQuest is the trial.",
+  "As soon as you start the parentQuest, you must overcome the trial.",
 ]
-firstYouMust = conjure(_firstYouMust.map(interp));
+var firstYouMust = conjure(_firstYouMust.map(interp));
 
-_nextYouMust = [
-  "seventh, you must overcome the trial.",
-  "You must, seventhly, overcome the trial.",
+var _nextYouMust = [
+  "_seventh, you must overcome the trial.",
+  "The _seventh step of the parentQuest is to overcome the trial.",
+  "You must, _seventhly, overcome the trial.",
   "After that, you must overcome the trial.",
-  "seventhly, you must overcome the trial.",
-  "Then, you must overcome the seventh: the trial.",
+  "_seventhly, you must overcome the trial.",
+  "Then, you must overcome the _seventh step of the parentQuest: the trial.",
 ]
-nextYouMust = conjure(_nextYouMust.map(interp));
+var nextYouMust = conjure(_nextYouMust.map(interp));
 
-_finallyYouMust = [
+var _finallyYouMust = [
   "Finally, you must overcome the trial.",
-  "You must then overcome the seventh and final challenge, the trial.",
+  "You must then overcome the _seventh and final challenge, the trial.",
   "After that, you simply must overcome the trial.",
   "Now, finally, overcome the trial.",
   "Now, finally, you must overcome the trial.",
   "Lastly, overcome the trial.",
 ]
-finallyYouMust = conjure(_finallyYouMust.map(interp));
+var finallyYouMust = conjure(_finallyYouMust.map(interp));
 
-_trialComplete = [
+var _trialComplete = [
   "After this, you have finished the trial.",
   "Then, the trial will be complete.",
   "Finally, the trial will be complete.",
 ]
-trialComplete = conjure(_trialComplete.map(interp));
+var trialComplete = conjure(_trialComplete.map(interp));
 
-_parentTrialContinues = [
+var _parentTrialContinues = [
   "But the trial is not over.",
   "Now, you must continue the trial.",
   "But you must continue the trial.",
   "But the trial goes on.",
   "But you still must overcome the rest of the trial.",
 ]
-parentTrialContinues = conjure(_parentTrialContinues.map(interp));
+var parentTrialContinues = conjure(_parentTrialContinues.map(interp));
 
-seven = x =>
+var seven = x =>
   ['one', 'two', 'three', 'four',
   'five', 'six', 'seven', 'eight',
   'nine', 'ten', 'eleven', 'twelve',
   'thirteen', 'fourteen', 'fifteen',
   'sixteen', 'seventeen', 'eighteen'][x];
 
-seventh = x =>
+var seventh = x =>
  ['first', 'second', 'third', 'fourth',
     'fifth', 'sixth', 'seventh', 'eighth',
     'ninth', 'tenth', 'eleventh', 'twelfth',
     'thirteenth', 'fourteenth', 'fifteenth',
     'sixteenth', 'seventeenth', 'eighteenth'][x];
 
-entry = ({level, challengeIndex, voice, parent}) => {
+var entry = ({level, challengeIndex, voice, parent}) => {
   let r;
-  if (level > 10) {
-    r = 1;
+  if (level > 3) {
+    r = Math.random() + 0.6;
   } else {
     r = Math.random();
   }
@@ -186,14 +234,18 @@ entry = ({level, challengeIndex, voice, parent}) => {
   let challenge;
   let challengeType;
   let nChallenges = 0;
-  if (r > 0.8) {
+  if (r > 0.85) {
     overcome = defeat();
     challenge = sultanOfDoom();
     challengeType = 'sultan';
-  } else if (r > 0.6){
+  } else if (r > 0.7){
     overcome = traverse();
     challenge = bog();
     challengeType = 'bog';
+  } else if (r > 0.6) {
+    overcome = retrieve();
+    challenge = artifactOfDoom();
+    challengeType = 'artifact';
   } else {
     overcome = complete();
     nChallenges = rand(6) + 3;
@@ -220,16 +272,16 @@ entry = ({level, challengeIndex, voice, parent}) => {
     voice,
   }
 
-  console.log(voice, cap(sentence(overcome, challenge, seventh(challengeIndex))));
+  console.log(voice, cap(sentence(overcome, challenge, challengeIndex, parent)));
   for (let i = rand(3); i > 0; i--) {
     console.log(chitteringVoice(), interjections(overcome, challenge));
   }
   if (rand(20) == 0) {
-    console.log(`All in chorus: ${challenge}! ${challenge}!`)
+    console.log(`All in chorus: The ${challenge}! The ${challenge}!`)
   }
 
   if (challengeType == 'moreChallenges') {
-    console.log(voice, thereAreSevenSteps(overcome, challenge, '', seven(nChallenges)));
+    console.log(voice, thereAreSevenSteps(overcome, challenge, nChallenges));
     Array(nChallenges)
       .fill(entry)
       .map((_, i) => entry({ challengeIndex: i, level: level + 1, voice: chitteringVoice(), parent: thisEntry }));
@@ -243,4 +295,4 @@ entry = ({level, challengeIndex, voice, parent}) => {
   return thisEntry
 }
 
-console.log(entry({challengeIndex: 0, level: 0}))
+console.log(entry({challengeIndex: 0, level: 0, parent: {challenge: "trial of the doors"}}))

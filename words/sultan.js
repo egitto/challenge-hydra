@@ -9,5 +9,10 @@ module.exports = [
   'daimyo',
   'god',
   'goddess',
-  'scion', 
+  'scion',
+  'king',
+  'queen',
+  'princess',
+  'prince',
+  'champion',
 ];
