@@ -38,7 +38,7 @@ var cap = s => {
   return s[0].toUpperCase() + s.slice(1);
 }
 
-var evalThunk = (x, ...args) => ((x instanceof Function) ? x(...args) : x);
+var evalThunk = (x, ...args) => ((x instanceof Function) ? evalThunk(x(...args)) : x);
 var randItem = x => x[rand(x.length)];
 var conjure = (_thing) => {
   var l = Math.floor(_thing.length / 2);
@@ -87,7 +87,6 @@ var traverse = conjure(_traverse);
 
 var bodyPart = conjure(['skull', 'bone', 'left arm', 'right arm', 'heart', 'hand']);
 var _weapon = ['sword', 'shield', 'glaive', 'axe', 'dagger'];
-var weapon = conjure(_weapon);
 var _artifact = _weapon.concat(['trophy', 'philtre', 'device', 'phylactery', 'cauldron', 'artifact']);
 var artifact = conjure(_artifact);
 var shard = conjure(['shard', 'fragment', 'piece', 'splinter']);
@@ -146,7 +145,7 @@ const interp = (s) => (overcome, trial, number, parent) => {
   return evalThunk(s)
     .replace(/overcome/g, overcome)
     .replace(/trial/g, trial)
-    .replace(/_seventh/, seventh(number)) // if these are /seventh/g, then it breaks for seven, lol
+    .replace(/_seventh/, seventh(number))
     .replace(/_seven/, seven(number))
     .replace(/parentQuest/, parent && parent.challenge);
 }
@@ -156,30 +155,30 @@ var interjections = conjure(_interjections)
 var step = conjure(['step', 'part', 'stage', 'level', 'task', 'piece', 'component']);
 var steps = plural(step);
 _thereAreSevenSteps = [
-  () => "There are _seven steps to the trial.",
-  () => "There are _seven steps before you can overcome the trial.",
-  () => "There are _seven steps to overcome the trial.",
-  () => "The trial has _seven steps.",
+  () => `There are _seven ${steps()} to the trial.`,
+  () => `There are _seven ${steps()} before you can overcome the trial.`,
+  () => `There are _seven ${steps()} to overcome the trial.`,
+  () => `The trial has _seven ${steps()}.`,
 ]
 // todo: figure out how to put thunks into _thereAreSevenSteps
 var thereAreSevenSteps = conjure(_thereAreSevenSteps.map(interp));
 
 var _firstYouMust = [
-  "First, you must overcome the trial.",
-  "You must first overcome the trial.",
-  "First, overcome the trial.",
-  "The first step of the parentQuest is the trial.",
-  "As soon as you start the parentQuest, you must overcome the trial.",
+  `First, you must overcome the trial.`,
+  `You must first overcome the trial.`,
+  `First, overcome the trial.`,
+  () => `The first ${step()} of the parentQuest is to overcome the trial.`,
+  `As soon as you start the parentQuest, you must overcome the trial.`,
 ]
 var firstYouMust = conjure(_firstYouMust.map(interp));
 
 var _nextYouMust = [
   "_seventh, you must overcome the trial.",
-  "The _seventh step of the parentQuest is to overcome the trial.",
+  () => `The _seventh ${step()} of the parentQuest is to overcome the trial.`,
   "You must, _seventhly, overcome the trial.",
   "After that, you must overcome the trial.",
   "_seventhly, you must overcome the trial.",
-  "Then, you must overcome the _seventh step of the parentQuest: the trial.",
+  () => `Then, you must ${complete()} the _seventh ${step()} of the parentQuest: overcome the trial.`,
 ]
 var nextYouMust = conjure(_nextYouMust.map(interp));
 
@@ -225,10 +224,9 @@ var seventh = x =>
 
 var entry = ({level, challengeIndex, voice, parent}) => {
   let r;
+  r = Math.random();
   if (level > 3) {
-    r = Math.random() + 0.6;
-  } else {
-    r = Math.random();
+    r += 0.6; // let's try not to get _too_ deep here
   }
   let overcome;
   let challenge;
@@ -247,7 +245,8 @@ var entry = ({level, challengeIndex, voice, parent}) => {
     challenge = artifactOfDoom();
     challengeType = 'artifact';
   } else {
-    overcome = complete();
+    // these are all close enough synonyms, so evaluate them on the fly instead of now
+    overcome = complete;
     nChallenges = rand(6) + 3;
     challenge = moreChallengesOfDoom(nChallenges);
     challengeType = 'moreChallenges';

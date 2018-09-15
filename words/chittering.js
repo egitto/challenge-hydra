@@ -4,6 +4,7 @@ module.exports = [
   'rumbling',
   'cackling',
   'chittering',
+  'piercing',
   'high-pitched',
   'lugubrious',
   'piping',
