@@ -1,0 +1,16 @@
+module.exports = [
+  "He'll never overcome The trial!",
+  "Oh, I love The trial!",
+  "Ohhhhh.... The trial! My favorite!",
+  "Does it have to be The trial?",
+  "The trial! The trial!",
+  "Why is it always The trial?",
+  "Yesss, The trial!",
+  "Ah yes, the trial...",
+  "I had almost forgotten about the trial",
+  "Wait, what's the trial?",
+  "No, not the trial!",
+  "Yes, yes, the trial!",
+  "Look at him, he couldn't overcome a paper bag.",
+  "Yes... Yes, the trial...",
+];

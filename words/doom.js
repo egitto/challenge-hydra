@@ -1,0 +1,16 @@
+module.exports = [
+  'doom',
+  'odors',
+  'stench',
+  'horror',
+  'chaos',
+  'balance',
+  'order',
+  'misery',
+  'sadness',
+  'power',
+  'mysticism',
+  'wisdom',
+  'violence',
+  'warfare',
+];
