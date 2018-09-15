@@ -137,7 +137,7 @@ var _sultanOfDoom = [
   () => `${Cursed()} ${Sultan()}`,
   () => `${Cursed()} ${Sultan()} of ${Doom()}`,
   () => `${Cursed()} ${Sultan()} of ${maybe('The')}${Cursed()} ${Doom()}`,
-  () => `${Sultan()} of ${maybe('The')}${Doom()}`,
+  () => `${Sultan()} of ${Doom()}`,
   () => `${Sultan()} of ${maybe('The')}${Cursed()} ${Doom()}`,
   () => `${Sultan()} of the ${cursedBogOfTheSultanOfDoom()}`,
 ]

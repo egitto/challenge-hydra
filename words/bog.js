@@ -4,7 +4,7 @@ module.exports = [
   'desert',
   'sea',
   'void',
-  'archipellago',
+  'archipelago',
   'steppe',
   'plateau',
   'tundra',

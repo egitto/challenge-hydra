@@ -7,5 +7,5 @@ module.exports = [
   'best',
   'destroy',
   'slay',
-  'decieve',
+  'deceive',
 ];

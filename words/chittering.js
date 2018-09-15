@@ -28,7 +28,7 @@ module.exports = [
   'pitiless',
   'pitying',
   'sibilant',
-  'gutteral',
+  'guttural',
   'ghoulish',
   'jubilant',
   'muffled',

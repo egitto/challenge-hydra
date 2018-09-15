@@ -9,7 +9,7 @@ module.exports = [
   'frozen',
   'drowning',
   'stone',
-  'firey',
+  'fiery',
   'eternal',
   'meta',
   'chaotic',
