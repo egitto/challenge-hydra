@@ -10,6 +10,10 @@ var _sultan = require('./words/sultan');
 var _complete = require('./words/complete');
 var _interjections = require('./words/interjections');
 
+MAX_LINE_LENGTH = 100;
+MAX_CHALLENGE_LENGTH = 40;
+MAX_LINES = 2000;
+linesTotal = 0;
 
 var plural = (s) => {
   if (s instanceof Function) return (...args) => plural(s(...args));
@@ -38,7 +42,7 @@ var cap = s => {
   return s[0].toUpperCase() + s.slice(1);
 }
 
-var evalThunk = (x, ...args) => ((x instanceof Function) ? evalThunk(x(...args)) : x);
+var et = (x, ...args) => ((x instanceof Function) ? et(x(...args)) : x);
 var randItem = x => x[rand(x.length)];
 var conjure = (_thing) => {
   var l = Math.floor(_thing.length / 2);
@@ -53,34 +57,46 @@ var conjure = (_thing) => {
     recents.unshift(r);
     return a[r];
   }
-  return (...args) => evalThunk(randSkipRecents(_thing), ...args);
+  return (...args) => et(randSkipRecents(_thing), ...args);
 }
 
-// the evalThunk is so it doesn't deplete uniqueness
-var maybe = (s, p = 0.5) => Math.random() < p ? `${evalThunk(s)} ` : '';
+var makeLine = (voice, text, verb = 'says') => {
+  text = cap(et(text));
+  // text = text.replace(/([^.])\.$/, '$1,');
+  voice = cap(et(voice));
+  let a = voice[0].match(/h?[aeiou]/) ? 'an' : 'a'
+  // return `"${cap(et(text))}" ${verb} ${a} ${et(voice)}`;
+  return `${et(voice)}: ${cap(et(text))}`;
+}
+
+// the et is so it doesn't deplete uniqueness
+var maybe = (s, p = 0.5) => Math.random() < p ? `${et(s)} ` : '';
 
 var chittering = conjure(_chittering);
 var shriek = conjure(_shriek);
 
 var _chitteringVoice = [
-  () => `${cap(chittering())} ${shriek()}:`,
-  () => `${cap(chittering())} ${shriek()}:`,
-  () => `${cap(chittering())} ${shriek()}:`,
-  () => `${cap(chittering())} ${shriek()}:`,
-  () => `${cap(chittering())}, ${chittering()} ${shriek()}:`,
+  () => `${chittering()} ${shriek()}`,
+  () => `${chittering()} ${shriek()}`,
+  () => `${chittering()} ${shriek()}`,
+  () => `${chittering()} ${shriek()}`,
+  () => `${chittering()}, ${chittering()} ${shriek()}`,
 ]
 var chitteringVoice = conjure(_chitteringVoice);
 
 var doom = conjure(_doom);
+var Doom = cap(doom);
 var cursed = conjure(_cursed);
+var Cursed = cap(cursed);
 var bog = conjure(_bog);
+var Bog = cap(bog);
 var _cursedBogOfTheSultanOfDoom = [
-  () => `${cap(bog())}`,
-  () => `${cap(bog())} of the ${cap(cursed())} ${Sultan()}`,
-  () => `${cap(cursed())} ${cap(bog())}`,
-  () => `${cap(cursed())} ${cap(bog())}`,
-  () => `${cap(cursed())} ${cap(bog())}`,
-  () => `${cap(bog())} of the ${sultanOfDoom()}`,
+  () => `${Bog()} of the ${Cursed()} ${Sultan()}`,
+  () => `${Bog()} of ${Doom()}`,
+  () => `${Cursed()} ${Bog()} of ${Doom()}`,
+  () => `${Cursed()} ${Bog()}`,
+  () => `${Cursed()} ${Bog()}`,
+  () => `${Bog()} of the ${sultanOfDoom()}`,
 ]
 var cursedBogOfTheSultanOfDoom = conjure(_cursedBogOfTheSultanOfDoom);
 var traverse = conjure(_traverse);
@@ -117,15 +133,13 @@ var sultan = conjure(_sultan);
 var Sultan = cap(sultan);
 
 var _sultanOfDoom = [
+  () => `${Cursed()} ${Sultan()}`,
+  () => `${Cursed()} ${Sultan()}`,
+  () => `${Cursed()} ${Sultan()} of ${Doom()}`,
+  () => `${Cursed()} ${Sultan()} of ${maybe('The')}${Cursed()} ${Doom()}`,
+  () => `${Sultan()} of ${maybe('The')}${Doom()}`,
+  () => `${Sultan()} of ${maybe('The')}${Cursed()} ${Doom()}`,
   () => `${Sultan()} of the ${cursedBogOfTheSultanOfDoom()}`,
-  () => `${Sultan()} of ${cap(doom())}`,
-  () => `${Sultan()} of ${cap(cursed())} ${cap(doom())}`,
-  () => `${Sultan()} of The ${cap(cursed())} ${cap(doom())}`,
-  () => `${cap(cursed())} ${Sultan()} of ${cap(doom())}`,
-  () => `${cap(cursed())} ${Sultan()} of ${cap(cursed())} ${cap(doom())}`,
-  () => `${Sultan()} of the ${cursedBogOfTheSultanOfDoom()}`,
-  () => `${sultanOfDoom()}, the ${sultanOfDoom()}`,
-  () => `${cap(cursed())} ${Sultan()}`,
 ]
 var sultanOfDoom = conjure(_sultanOfDoom);
 
@@ -135,14 +149,14 @@ var complete = conjure(_complete);
 var moreChallenges = conjure(_moreChallenges);
 var _moreChallengesOfDoom = [
   () => `${cap(moreChallenges())} of the ${sultanOfDoom()}`,
-  () => `${cap(cursed())} ${cap(moreChallenges())}`,
-  () => `${cap(moreChallenges())} of ${cap(doom())}`,
-  () => `${cap(cursed())} ${cap(moreChallenges())} of ${cap(doom())}`,
+  () => `${Cursed()} ${cap(moreChallenges())}`,
+  () => `${cap(moreChallenges())} of ${Doom()}`,
+  () => `${Cursed()} ${cap(moreChallenges())} of ${Doom()}`,
 ]
 var moreChallengesOfDoom = conjure(_moreChallengesOfDoom);
 
 const interp = (s) => (overcome, trial, number, parent) => {
-  return evalThunk(s)
+  return et(s)
     .replace(/overcome/g, overcome)
     .replace(/trial/g, trial)
     .replace(/_seventh/, seventh(number))
@@ -154,7 +168,7 @@ var interjections = conjure(_interjections)
 
 var step = conjure(['step', 'part', 'stage', 'level', 'task', 'piece', 'component']);
 var steps = plural(step);
-_thereAreSevenSteps = [
+var _thereAreSevenSteps = [
   () => `There are _seven ${steps()} to the trial.`,
   () => `There are _seven ${steps()} before you can overcome the trial.`,
   () => `There are _seven ${steps()} to overcome the trial.`,
@@ -175,6 +189,7 @@ var firstYouMust = conjure(_firstYouMust.map(interp));
 var _nextYouMust = [
   "_seventh, you must overcome the trial.",
   () => `The _seventh ${step()} of the parentQuest is to overcome the trial.`,
+  () => `The _seventh ${step()} of the parentQuest is to overcome the trial.`,
   "You must, _seventhly, overcome the trial.",
   "After that, you must overcome the trial.",
   "_seventhly, you must overcome the trial.",
@@ -193,7 +208,8 @@ var _finallyYouMust = [
 var finallyYouMust = conjure(_finallyYouMust.map(interp));
 
 var _trialComplete = [
-  "After this, you have finished the trial.",
+  "After this, you will have finished the trial.",
+  "Now, the trial will be complete.",
   "Then, the trial will be complete.",
   "Finally, the trial will be complete.",
 ]
@@ -222,6 +238,16 @@ var seventh = x =>
     'thirteenth', 'fourteenth', 'fifteenth',
     'sixteenth', 'seventeenth', 'eighteenth'][x];
 
+var looksFake = s => {
+  if (s.length > MAX_CHALLENGE_LENGTH) return true;
+  var ofs = s.match(/\bof\b/g) || [];
+  if (ofs.length > 2) return true;
+  var hyphens = s.match(/[^-]-[^-]/) || [];
+  if (hyphens.length > 2) return true;
+  if (hyphens.length + ofs.length > 3) return true;
+  return false;
+}
+
 var entry = ({level, challengeIndex, voice, parent}) => {
   let r;
   r = Math.random();
@@ -232,6 +258,7 @@ var entry = ({level, challengeIndex, voice, parent}) => {
   let challenge;
   let challengeType;
   let nChallenges = 0;
+  var lines = [];
   if (r > 0.85) {
     overcome = defeat();
     challenge = sultanOfDoom();
@@ -269,29 +296,46 @@ var entry = ({level, challengeIndex, voice, parent}) => {
     challengeIndex,
     nChallenges,
     voice,
+    lines
   }
 
-  console.log(voice, cap(sentence(overcome, challenge, challengeIndex, parent)));
+  lines.push(makeLine(voice, cap(sentence(overcome, challenge, challengeIndex, parent))));
+  
+  // if this line is too long, make a new one instead.
+  if (lines[0].length > MAX_LINE_LENGTH || looksFake(challenge)) {
+    if (looksFake(challenge)) console.log('Discarded:', challenge);
+    return entry({ level, challengeIndex, voice, parent });
+  }
+
   for (let i = rand(3); i > 0; i--) {
-    console.log(chitteringVoice(), interjections(overcome, challenge));
+    lines.push(makeLine(chitteringVoice(), interjections(overcome, challenge)));
   }
   if (rand(20) == 0) {
-    console.log(`All in chorus: The ${challenge}! The ${challenge}!`)
+    lines.push(makeLine('all in chorus', `The ${challenge}! The ${challenge}!`));
+  }
+
+  linesTotal += lines.length;
+  if (linesTotal > MAX_LINES) {
+    lines.push(`MAX_LINES (${MAX_LINES}) exceeded`);
+    return thisEntry;
   }
 
   if (challengeType == 'moreChallenges') {
-    console.log(voice, thereAreSevenSteps(overcome, challenge, nChallenges));
-    Array(nChallenges)
+    lines.push(makeLine(voice, thereAreSevenSteps(overcome, challenge, nChallenges)));
+    var children = Array(nChallenges)
       .fill(entry)
-      .map((_, i) => entry({ challengeIndex: i, level: level + 1, voice: chitteringVoice(), parent: thisEntry }));
-    console.log(voice, trialComplete(overcome, challenge));
+      .map((_, i) => entry({ challengeIndex: i, level: level + 1, parent: thisEntry }));
+    children.forEach(child => child.lines.forEach(line => lines.push(line)));
+    lines.push(makeLine(voice, trialComplete(overcome, challenge)));
     if (parent && parent.nChallenges !== challengeIndex + 1) {
       // The parent has more children! let's get back on topic.
-      console.log(parent.voice, parentTrialContinues(parent.overcome, parent.challenge));
+      lines.push(makeLine(parent.voice, parentTrialContinues(parent.overcome, parent.challenge)));
     } 
   };
   
   return thisEntry
 }
 
-console.log(entry({challengeIndex: 0, level: 0, parent: {challenge: "trial of the doors"}}))
+var parent = { challenge: moreChallengesOfDoom(1), voice: chitteringVoice(), nChallenges: 1 };
+
+entry({challengeIndex: 0, level: 0, parent}).lines.forEach(x => console.log(x));
