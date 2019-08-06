@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   "Aaaah, the trial!",
   "Ah yes, the trial...",
   "Ahahaha, the trial!",

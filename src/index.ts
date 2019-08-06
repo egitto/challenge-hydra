@@ -1,65 +1,23 @@
-const cp = require('child_process');
-var _cursed = require('./words/cursed');
-var _shriek = require('./words/shriek');
-var _chittering = require('./words/chittering');
-var _moreChallenges = require('./words/moreChallenges');
-var _bog = require('./words/bog');
-var _defeat = require('./words/defeat');
-var _doom = require('./words/doom');
-var _traverse = require('./words/traverse');
-var _sultan = require('./words/sultan');
-var _complete = require('./words/complete');
-var _interjections = require('./words/interjections');
+import _cursed from './words/cursed';
+import _shriek from './words/shriek';
+import _chittering from './words/chittering';
+import _moreChallenges from './words/moreChallenges';
+import _bog from './words/bog';
+import _defeat from './words/defeat';
+import _doom from './words/doom';
+import _traverse from './words/traverse';
+import __sultan from './words/sultan';
+import _complete from './words/complete';
+import __interjections from './words/interjections';
+import { correctionSentence, ohYoureRight, noImStillRight, noYoureStillWrong } from './corrections';
+import { cap, et, conjure, S, plural, rand, F, maybe, interp, seven, seventh } from './genericHelpers';
 
-MAX_LINE_LENGTH = 100;
-MAX_CHALLENGE_LENGTH = 40;
-MAX_LINES = 2000;
-linesTotal = 0;
+const MAX_LINE_LENGTH = 100;
+const MAX_CHALLENGE_LENGTH = 40;
+const MAX_LINES = 2000;
+var linesTotal = 0;
 
-var plural = (s) => {
-  if (s instanceof Function) return (...args) => plural(s(...args));
-  var rules = {
-    a: /um$/, 
-    es: /is$/, 
-    i: /us$/, 
-    $1es: /(sh?)$/,
-    icies: /(i|e)x$/,
-    xes: /x$/,
-    ies: /y$/, 
-    ves: /fe$/, 
-    $1s: /([^s])$/,
-  };
-  for (r in rules) {
-    var n = s.replace(rules[r], r);
-    if (n !== s) return n;
-  }
-  return s;
-}
-
-var rand = n => Math.floor(n * Math.random());
-
-var cap = s => {
-  if (s instanceof Function) return (...args) => cap(s(...args));
-  return s[0].toUpperCase() + s.slice(1);
-}
-
-var et = (x, ...args) => ((x instanceof Function) ? et(x(...args)) : x);
-var conjure = (_thing) => {
-  var l = Math.floor(_thing.length / 2);
-  var recents = (new Array(l));
-  var randSkipRecents = a => {
-    r = rand(a.length);
-    if (recents.includes(r)) {
-      return randSkipRecents(a);
-    }
-    recents.pop();
-    recents.unshift(r);
-    return a[r];
-  }
-  return (...args) => et(randSkipRecents(_thing), ...args);
-}
-
-var makeLine = (voice, text, verb = 'says') => {
+var makeLine = (voice: S = '', text: S = '', verb = 'says') => {
   text = cap(et(text));
   // text = text.replace(/([^.])\.$/, '$1,');
   voice = cap(et(voice));
@@ -68,11 +26,8 @@ var makeLine = (voice, text, verb = 'says') => {
   return `${et(voice)}: ${cap(et(text))}`;
 }
 
-// the et is so it doesn't deplete uniqueness
-var maybe = (s, p = 0.5) => Math.random() < p ? `${et(s)} ` : '';
-var mb = (s1, s2 = "") => Math.random() < 0.5 ? et(s1) : et(s2);
-
 var chittering = conjure(_chittering);
+
 var shriek = conjure(_shriek);
 
 var _chitteringVoice = [
@@ -90,7 +45,7 @@ var cursed = conjure(_cursed);
 var Cursed = cap(cursed);
 var bog = conjure(_bog);
 var Bog = cap(bog);
-var _cursedBogOfTheSultanOfDoom = [
+var _cursedBogOfTheSultanOfDoom= [
   () => `${Bog()} of the ${Cursed()} ${Sultan()}`,
   () => `${Bog()} of ${Doom()}`,
   () => `${Cursed()} ${Bog()} of ${Doom()}`,
@@ -109,6 +64,7 @@ var artifact = conjure(_artifact);
 var Artifact = cap(artifact);
 var shard = conjure(['shard', 'fragment', 'piece', 'splinter']);
 
+type A = TemplateStringsArray;
 var _artifactOfDoom = [
   () => `${seven(rand(5) + 2)} ${maybe(Cursed)}${plural(BodyPart())} of ${Doom()}`,
   () => `${maybe(Cursed)}${BodyPart()} of ${Doom()}`,
@@ -130,11 +86,12 @@ var _moreSultans = [
   () => Sultan() + '-' + Sultan(),
   () => { var s = sultan(); return `${cap(s)} of ${plural(s)}`; },
 ]
+var _sultan: S[] = __sultan;
 _sultan = _sultan.concat(_moreSultans);
 var sultan = conjure(_sultan);
 var Sultan = cap(sultan);
 
-var _sultanOfDoom = [
+var _sultanOfDoom: S[] = [
   () => `${Cursed()} ${Sultan()}`,
   () => `${Cursed()} ${Sultan()}`,
   () => `${Cursed()} ${Sultan()} of ${Doom()}`,
@@ -157,15 +114,7 @@ var _moreChallengesOfDoom = [
 ]
 var moreChallengesOfDoom = conjure(_moreChallengesOfDoom);
 
-const interp = (s) => (overcome, trial, number, parent) => {
-  return et(s)
-    .replace(/overcome/g, overcome)
-    .replace(/trial/g, trial)
-    .replace(/_seventh/, seventh(number))
-    .replace(/_seven/, seven(number))
-    .replace(/parentQuest/, parent && parent.challenge);
-}
-_interjections = _interjections.map(x => interp(x))
+var _interjections = __interjections.map(x => interp(x))
 var interjections = conjure(_interjections)
 
 var step = conjure(['step', 'part', 'stage', 'task', 'piece', 'component']);
@@ -230,73 +179,7 @@ var _parentTrialContinues = [
 ]
 var parentTrialContinues = conjure(_parentTrialContinues.map(interp));
 
-fool = conjure(["fool", "idiot", "senile old bat", "senile old ghoul"]);
-
-var _correctionSentence = [
-  "No no no. The _seventh step of the parentQuest is to overcome the trial!",
-  () => cap(`${mb`You `}liar! No, the _seventh step is to overcome the trial!`),
-  "What! You are mistaken! The _seventh step is to overcome the trial!",
-  "No, that isn't right! It's the trial!",
-  "That's not part of the parentQuest at all!",
-  "That doesn't sound right... Isn't the _seventh step to overcome the trial?",
-  () => `No you ${fool()}, the _seventh step is to overcome the trial!`,
-  () => cap(`${maybe('I think')}you're mistaken! The _seventh step is to overcome the trial!`),
-];
-var correctionSentence = conjure(_correctionSentence.map(interp));
-
-certain = conjure(['certain', 'sure', 'positive', 'confident', 'really sure']);
-
-var _ohYoureRight = [
-  () => `Ah, well, if you're ${certain()}...`,
-  'Ah, right, of course, of course.',
-  () => `Are you ${certain()}? Very well...`,
-  'Oh, really? It has been a while.',
-  'Ah, yes, of course.',
-  'Really? Drat!',
-  () => `What? Are you ${certain()}?`,
-  () => `${mb`What? `}It is?`,
-];
-var ohYoureRight = conjure(_ohYoureRight.map(interp));
-
-definitely = conjure(['definitely', 'absolutely', 'most definitely', 'assuredly'])
-
-var _noImStillRight = [
-  () => `${mb`no, `}I'm ${mb`quite `}certain it${mb("'s", " is")} the trial!`,
-  () => `No, stop talking, it's the trial!`,
-  () => `I have the floor and I say it's the trial!`,
-  () => `I am positive it's the trial!`,
-  () => `${mb`no, `}it's ${definitely()} the trial${mb('.', '!')}`,
-  () => `No, the _seventh step of the parentQuest is ${definitely()} the trial.`
-];
-var noImStillRight = cap(conjure(_noImStillRight.map(interp)));
-
-var _noYoureStillWrong = [
-  () => `${definitely()} not, it's the trial!`,
-  () => `No, it's ${definitely()} the trial!`,
-  () => `No!`,
-  () => `You are mistaken!`,
-  () => `You are wrong!`,
-  () => `We mustn't mislead this poor petitioner! It's the trial!`,
-  () => `No, I'm ${certain()} it's the trial!`,
-  () => `It isn't! It's the trial!`,
-];
-var noYoureStillWrong = cap(conjure(_noYoureStillWrong.map(interp)));
-
-var seven = x =>
-  ['one', 'two', 'three', 'four',
-  'five', 'six', 'seven', 'eight',
-  'nine', 'ten', 'eleven', 'twelve',
-  'thirteen', 'fourteen', 'fifteen',
-  'sixteen', 'seventeen', 'eighteen'][x];
-
-var seventh = x =>
- ['first', 'second', 'third', 'fourth',
-    'fifth', 'sixth', 'seventh', 'eighth',
-    'ninth', 'tenth', 'eleventh', 'twelfth',
-    'thirteenth', 'fourteenth', 'fifteenth',
-    'sixteenth', 'seventeenth', 'eighteenth'][x];
-
-var looksFake = s => {
+var looksFake = (s: string) => {
   if (s.length > MAX_CHALLENGE_LENGTH) return true;
   var ofs = s.match(/\bof\b/g) || [];
   if (ofs.length > 2) return true;
@@ -306,7 +189,8 @@ var looksFake = s => {
   return false;
 }
 
-const issueCorrections = oldChallengeEntry => {
+// todo: factor this out
+const issueCorrections = (oldChallengeEntry: Entry) => {
   let { level, challenge, challengeIndex, parent, voice, overcome, log, lines } = oldChallengeEntry;
   const oldChallenge = challenge;
   const newVoice = chitteringVoice();
@@ -318,7 +202,12 @@ const issueCorrections = oldChallengeEntry => {
     challengeIndex,
     parent
   )));
-  let winner = newVoice;
+  let winner: S = newVoice;
+
+  if (!voice) {
+    console.error(oldChallengeEntry);
+    throw new Error('voice not found');
+  }
 
   // Let them argue, and decide on a winner
   if (rand(2) == 0) {
@@ -340,7 +229,8 @@ const issueCorrections = oldChallengeEntry => {
   }
 
   if (winner == newVoice) {
-    const newChallengeEntry = entry({ level, challengeIndex, voice: newVoice, parent, ...newChallengeDeets });
+    const { challengeType, ...entryArgs } = newChallengeDeets;
+    const newChallengeEntry = entry({ level, challengeIndex, voice: newVoice, parent, ...entryArgs });
     newChallengeEntry.lines.forEach(line => lines.push(line));
     newChallengeEntry.lines = lines;
     return newChallengeEntry;
@@ -349,9 +239,15 @@ const issueCorrections = oldChallengeEntry => {
   }
 }
 
-var selectChallenge = (r) => {
+interface SelectedChallenge {
+  challenge: string,
+  nChallenges: number,
+  overcome: S,
+  challengeType: F<string>
+}
+var selectChallenge = (r?: number): SelectedChallenge => {
   r = r || Math.random()
-  let overcome;
+  let overcome: S;
   let challengeType;
   let nChallenges = 0;
   if (r > 0.85) {
@@ -371,10 +267,35 @@ var selectChallenge = (r) => {
   }
   let challenge = challengeType(nChallenges - 1);
   if (looksFake(challenge)) return selectChallenge(r);
-  return {challenge, nChallenges, overcome, challengeType};
+  return { challenge, nChallenges, overcome, challengeType };
 }
 
-var entry = ({ level, challengeIndex, voice, parent, lines, challenge, nChallenges, overcome }) => {
+export interface Entry {
+  overcome: S,
+  challenge?: S,
+  challengeIndex: number,
+  nChallenges?: number,
+  voice?: S,
+  lines: string[],
+  parent?: Entry | EntryArgs,
+  level?: number,
+  log: (...args: any[]) => void, // mutates lines array
+}
+
+interface EntryArgs {
+  challenge?: S,
+  nChallenges?: number,
+  voice?: S,
+
+  challengeIndex?: number,
+  level?: number,
+  parent?: Entry | EntryArgs,
+
+  lines?: string[],
+  overcome?: S,
+}
+
+var entry = ({ level = 0, challengeIndex = 0, voice, parent, lines = [], challenge = '', nChallenges, overcome }: EntryArgs): Entry => {
   let r;
   r = Math.random();
   if (level > 4) {
@@ -382,11 +303,14 @@ var entry = ({ level, challengeIndex, voice, parent, lines, challenge, nChalleng
   }
 
   if (!(challenge && overcome && nChallenges !== undefined)) {
-    var { challenge, nChallenges, overcome } = selectChallenge(r);
+    const selectedChallenge = selectChallenge(r);
+    challenge = selectedChallenge.challenge;
+    nChallenges = selectedChallenge.nChallenges;
+    overcome = selectedChallenge.overcome;
   }
   
-  var lines = lines || [];
-  var log = (...args) => {
+  // todo: ugh refactor this whole logging system. separate tree from log better?
+  var log = (...args: any[]) => {
     // console.log(...args.map(et));
     if (args.length === 1) { lines.push(...args); } else { lines.push(makeLine(...args)) };
   }
@@ -395,7 +319,7 @@ var entry = ({ level, challengeIndex, voice, parent, lines, challenge, nChalleng
 
   if (challengeIndex === 0) {
     sentence = firstYouMust;
-  } else if (challengeIndex === parent.nChallenges - 1) {
+  } else if (parent && challengeIndex === (parent.nChallenges || 0) - 1) {
     sentence = finallyYouMust;
   } else {
     sentence = nextYouMust;
@@ -455,24 +379,28 @@ var entry = ({ level, challengeIndex, voice, parent, lines, challenge, nChalleng
   return thisEntry
 }
 
+const sleep = (n: number) => new Promise(resolve => setTimeout(resolve, 1000 * n));
 
-
-while (true) {
-  console.log("");
-  console.log("");
-  console.log("");
-  linesTotal = 0;
-  var parent = { challenge: moreChallengesOfDoom(1), voice: chitteringVoice(), nChallenges: 1 };
-  var { lines } = entry({ challengeIndex: 0, level: 0, parent })
-  console.log(linesTotal, lines.length);
-  lines.forEach((line, i) => {
-    console.log(line);
-    // var t = line.length * 0.07;
-    // cp.execSync(`sleep ${t}`);
-  })
-  cp.execSync('sleep 6');
-  console.log("You thank the demons, and begin your journey.");
-  cp.execSync('sleep 6');
+const run = async () => {
+  while (true) {
+    console.log("");
+    console.log("");
+    console.log("");
+    linesTotal = 0;
+    var parent: EntryArgs = { challenge: moreChallengesOfDoom(1), voice: chitteringVoice(), nChallenges: 1 };
+    var { lines } = entry({ challengeIndex: 0, level: 0, parent })
+    console.log(linesTotal, lines.length);
+    for (const line of lines) {
+      console.log(line);
+      var t = line.length * 0.07;
+      await sleep(t);
+    }
+    await sleep(6);
+    console.log("You thank the demons, and begin your journey.");
+    await sleep(6);
+  }
 }
+
+run()
 
 // https://pastebin.com/vzjmhf7B

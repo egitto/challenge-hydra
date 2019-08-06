@@ -1,16 +1,15 @@
 const _cursed = import ('./words/cursed');
-_shriek = require('./words/shriek');
-_chittering = require('./words/chittering');
-_moreChallenges = require('./words/moreChallenges');
-_bog = require('./words/bog');
-_defeat = require('./words/defeat');
-_doom = require('./words/doom');
-_traverse = require('./words/traverse');
-_sultan = require('./words/sultan');
-_complete = require('./words/complete');
+const _shriek = require('./words/shriek');
+const _chittering = require('./words/chittering');
+const _moreChallenges = require('./words/moreChallenges');
+const _bog = require('./words/bog');
+const _defeat = require('./words/defeat');
+const _doom = require('./words/doom');
+const _traverse = require('./words/traverse');
+const _sultan = require('./words/sultan');
+const _complete = require('./words/complete');
 
-
-example = `Gravelley voice: But first you must complete the Infernal Rites three
+const example = `Gravelley voice: But first you must complete the Infernal Rites three
 Piping voice: Oh yes, the Infernal Rites, the Infernal Rites!
 Gravelley voice: The first infernal rite is to pass the Iron Gates
 Snarling voice: He'll never pass the Iron Gates!
@@ -19,12 +18,12 @@ All, in chorus: The Iron Gates! The Iron Gates!
 Liquid voice: The second Infernal Rite is to defeat the Stone Guardians seven
 Lugubrious voice: The first Stone Guardian is...`
 
-rand = n => Math.floor(n * Math.random());
+const rand = n => Math.floor(n * Math.random());
 
-cap = s => s[0].toUpperCase() + s.slice(1);
-evalThunk = (x, ...args) => ((x instanceof Function) ? x(...args) : x);
-randItem = x => x[rand(x.length)];
-conjure = (_thing) => {
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const evalThunk = (x, ...args) => ((x instanceof Function) ? x(...args) : x);
+const randItem = x => x[rand(x.length)];
+const conjure = (_thing) => {
   const l = Math.floor(_thing.length / 2);
   console.log(_thing);
   const recents = (new Array(l));
@@ -40,10 +39,10 @@ conjure = (_thing) => {
   return (...args) => evalThunk(randSkipRecents(_thing), ...args);
 }
 
-chittering = conjure(_chittering);
-shriek = conjure(_shriek);
+const chittering = conjure(_chittering);
+const shriek = conjure(_shriek);
 
-_chitteringVoice = [
+const _chitteringVoice = [
   `${cap(chittering())} ${shriek()}:`,
   `${cap(chittering())} ${shriek()}:`,
   `${cap(chittering())} ${shriek()}:`,
@@ -51,11 +50,11 @@ _chitteringVoice = [
   `${cap(chittering())}, ${chittering()} ${shriek()}:`,
   `${cap(shriek())}:`,
 ]
-chitteringVoice = conjure(_chitteringVoice);
+const chitteringVoice = conjure(_chitteringVoice);
 
-doom = conjure(_doom);
-cursed = conjure(_cursed);
-bog = conjure(_bog);
+const doom = conjure(_doom);
+const cursed = conjure(_cursed);
+const bog = conjure(_bog);
 
 
 _moreSultans = [
