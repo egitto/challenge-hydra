@@ -1,18 +1,18 @@
-import { conjure, cap, maybe, mb, interp } from "./genericHelpers";
+import { conjure, cap, maybe, mb, interp, t } from "./genericHelpers";
 
 var fool = conjure(["fool", "idiot", "senile old bat", "senile old ghoul"]);
 
 var _correctionSentence = [
   "No no no. The _seventh step of the parentQuest is to overcome the trial!",
-  () => cap(`${mb('You ')}liar! No, the _seventh step is to overcome the trial!`),
+  t`${mb('You ')}liar! No, the _seventh step is to overcome the trial!`,
   "What! You are mistaken! The _seventh step is to overcome the trial!",
   "No, that isn't right! It's the trial!",
   "That's not part of the parentQuest at all!",
   "That doesn't sound right... Isn't the _seventh step to overcome the trial?",
-  () => `No you ${fool()}, the _seventh step is to overcome the trial!`,
-  () => cap(`${maybe('I think')}you're mistaken! The _seventh step is to overcome the trial!`),
+  t`No you ${fool()}, the _seventh step is to overcome the trial!`,
+  t`${maybe('I think')} you're mistaken! The _seventh step is to overcome the trial!`,
 ];
-export var correctionSentence = conjure(_correctionSentence.map(interp));
+export var correctionSentence = conjure(_correctionSentence.map(cap).map(interp));
 
 export var certain = conjure(['certain', 'sure', 'positive', 'confident', 'really sure']);
 

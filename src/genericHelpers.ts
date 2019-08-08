@@ -50,20 +50,31 @@ export var cap = thunkinate(capitalize);
 export var et = <T, A extends any[]>(x: Thunk<T>, ...args: A): T => ((x instanceof Function) ? et(x(...args)) : x);
 
 // takes template string, returns a function that will evaluate everything inside
-export var t = (strings: string[], ...nonStrings: Thunk<string>[]) => {
+export var t = (strings: TemplateStringsArray, ...nonStrings: Thunk<string>[]) => {
+  const merge = (item: string, i: number) => {
+    const x = et(item);
+    if (x === undefined) {
+      console.error('undefined item encountered');
+      console.error(strings, nonStrings);
+      throw Error('undefined encountered');
+    }
+    return strings[i] + et(item);
+  }
   return () => {
     const enstringed = nonStrings.map(et);
     enstringed.push('');
     return enstringed
-      .map((item, i) => strings[i] + et(item))
+      .map(merge)
       .join('')
       .replace(/  +/g, ' ');
   }
 }
-export var conjure = (_thing: S[]) => {
+
+// function for pulling a random item out of the array, but only as long as it didn't just pull it out earlier
+export var conjure = <T>(_thing: Thunk<T>[]) => {
   var l = Math.floor(_thing.length / 2);
   var recents = (new Array(l));
-  var randSkipRecents = (a: S[]): S => {
+  var randSkipRecents = (a: Thunk<T>[]): Thunk<T> => {
     var r = rand(a.length);
     if (recents.includes(r)) {
       return randSkipRecents(a);
@@ -72,11 +83,11 @@ export var conjure = (_thing: S[]) => {
     recents.unshift(r);
     return a[r];
   }
-  return <A extends any[]>(...args: A) => et<string, A>(randSkipRecents(_thing), ...args);
+  return <A extends any[]>(...args: A) => et<T, A>(randSkipRecents(_thing), ...args);
 }
 
 // the et is so it doesn't deplete uniqueness
-export var maybe = (s: S, p = 0.5) => Math.random() < p ? `${et(s)} ` : '';
+export var maybe = (s: S, p = 0.5) => Math.random() < p ? et(s) : '';
 export var mb = (s1: S, s2 = "") => Math.random() < 0.5 ? et(s1) : et(s2);
 
 export const seven = (x: number) =>
