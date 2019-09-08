@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   'traverse',
   'traverse',
   'bypass',

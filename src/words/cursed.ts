@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   'iron',
   'cursed',
   'infernal',

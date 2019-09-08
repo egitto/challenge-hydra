@@ -1,0 +1,20 @@
+{
+  "name": "challenge_hydra",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/egitto/challenge-hydra.git",
+  "author": "arthur.d.egitto@gmail.com",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "ts-node ./src/index.ts",
+    "start-js": "node ./dist/index.js",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "@types/node": "^12.6.9",
+    "ts-node": "^8.3.0",
+    "tsconfig-paths": "^3.8.0",
+    "typescript": "^3.5.3"
+  }
+}
