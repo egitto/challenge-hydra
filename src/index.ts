@@ -17,7 +17,7 @@ const DELAY_SECONDS_BETWEEN_SESSIONS = 6;
 
 const MAX_LINE_LENGTH = 100;
 const MAX_CHALLENGE_LENGTH = 40;
-const MAX_LINES = 2000000;
+const MAX_LINES = 200000;
 const MAX_DEPTH = 20;
 
 const CORRECTION_PROBABILITY = 0.125;
@@ -235,8 +235,8 @@ const issueCorrections = (oldChallengeEntry: Entry) => {
   if (winner == newVoice) {
     const { challengeType, ...entryArgs } = newChallengeDeets;
     const newChallengeEntry = entry({ level, challengeIndex, voice: newVoice, parent, ...entryArgs });
-    newChallengeEntry.lines.forEach(line => lines.push(line)); // don't like this
-    newChallengeEntry.lines = lines;
+    // newChallengeEntry.lines.forEach(line => lines.push(line)); // don't like this
+    newChallengeEntry.lines = newChallengeEntry.lines.concat(lines);
     return newChallengeEntry;
   } else {
     return null;
